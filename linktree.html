@@ -124,7 +124,7 @@
                 <h1 class="elite-title text-3xl font-bold text-white mb-2 tracking-wider">
                     SHAHRYAR
                 </h1>
-                <p class="text-gray-400 text-lg tracking-wide">A GREAT DUMBA$$</p>
+                <p class="text-gray-400 text-lg tracking-wide">Developer • Artist • Security Enthusiast</p>
                 
                 <!-- Cyber line separator -->
                 <div class="cyber-line w-48 mx-auto mt-6"></div>
@@ -251,6 +251,32 @@
                 
             </div>
             
+            <!-- TryHackMe Badge -->
+            <div id="thm-badge-section" class="mt-6 flex justify-center">
+                <!-- Live iframe (tried first) -->
+                <div id="thm-live" class="hidden link-card rounded-xl p-4 flex flex-col items-center gap-3 w-full">
+                    <p class="text-gray-400 text-xs tracking-widest uppercase">TryHackMe Profile</p>
+                    <iframe
+                        id="thm-iframe"
+                        src="https://tryhackme.com/api/v2/badges/public-profile?userPublicId=547071"
+                        style="border:none; width:100%; min-height:100px;"
+                        scrolling="no"
+                    ></iframe>
+                </div>
+                <!-- Static fallback image -->
+                <div id="thm-static" class="hidden link-card rounded-xl p-4 flex flex-col items-center gap-3 w-full">
+                    <p class="text-gray-400 text-xs tracking-widest uppercase">TryHackMe Profile</p>
+                    <a href="https://tryhackme.com/p/assassins" target="_blank">
+                        <img
+                            id="thm-img"
+                            src="https://tryhackme-badges.s3.amazonaws.com/assassins.png"
+                            alt="TryHackMe Badge"
+                            class="rounded-lg max-w-full"
+                        />
+                    </a>
+                </div>
+            </div>
+
             <!-- Footer -->
             <div class="mt-10 text-center">
                 <div class="cyber-line w-32 mx-auto mb-4"></div>
@@ -306,6 +332,56 @@
         }
         
         createParticles();
+    </script>
+
+    <!-- TryHackMe Badge Fallback Script -->
+    <script>
+        (function () {
+            const section  = document.getElementById('thm-badge-section');
+            const liveDiv  = document.getElementById('thm-live');
+            const staticDiv = document.getElementById('thm-static');
+            const iframe   = document.getElementById('thm-iframe');
+            const img      = document.getElementById('thm-img');
+
+            function showStatic() {
+                liveDiv.classList.add('hidden');
+                staticDiv.classList.remove('hidden');
+            }
+
+            function hideAll() {
+                section.classList.add('hidden');
+            }
+
+            // Static image fallback: if the .png also fails, hide everything
+            img.onerror = function () {
+                hideAll();
+            };
+
+            // Try loading the live iframe via a fetch probe first
+            // (fetch lets us detect network/CORS failures cleanly)
+            fetch('https://tryhackme.com/api/v2/badges/public-profile?userPublicId=547071', {
+                mode: 'no-cors',
+                cache: 'no-store'
+            })
+            .then(function () {
+                // Reachable — show the live iframe
+                liveDiv.classList.remove('hidden');
+
+                // Safety timeout: if iframe hasn't visually loaded after 8s, fall back to static
+                var fallbackTimer = setTimeout(function () {
+                    showStatic();
+                }, 8000);
+
+                iframe.addEventListener('load', function () {
+                    clearTimeout(fallbackTimer);
+                    // iframe loaded — keep it visible
+                }, { once: true });
+            })
+            .catch(function () {
+                // Unreachable — skip iframe, try static image
+                showStatic();
+            });
+        })();
     </script>
 </body>
 </html>
